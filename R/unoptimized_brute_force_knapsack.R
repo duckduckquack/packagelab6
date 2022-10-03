@@ -1,3 +1,14 @@
+#' Unoptimized version of the brute force algorithm for the knapsack problem.
+#'
+#' @param x a data frame
+#' @param W a positive number
+#'
+#' @return a list
+#' @export
+#'
+#' @examples
+#' x <- data.frame(v = c(3, 4, 10), w = c(10, 12, 7))
+#' unoptimized_brute_force_knapsack(x, 10)
 unoptimized_brute_force_knapsack <-
   function(x, W){
     #checks

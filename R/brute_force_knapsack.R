@@ -43,7 +43,7 @@ brute_force_knapsack <-
       vs <- vapply(1:m, function(i){sum(v[which(comb[[i]] == 1)])}, numeric(1))
     }else{
       #get the number of cores
-      ncores <- parallel::detectCores() %/% 2
+      ncores <- parallel::detectCores()
       #find all the combinations in parallel
       comb <- parallel::mclapply(1:m, function(x){intToBits(x)[1:n]}, mc.cores = ncores)
       #find total weight and value for each combination in parallel
