@@ -13,13 +13,14 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-This vignette is going to represent our lab report for assignment number 6. Also, all the answers to the questions in the lab will be included.
+This vignette is going to represent our lab report for assignment number 6. Also, all the answers to the questions in the lab will be included. 
 
 First, we load the package:
 ```{r}
 library(packagelab6)
 ```
 
+It is important to point out here that the running time of a function depends on many factors. Below we are going to provide just a general idea of the number of seconds taken from our functions to run as this can vary greatly depending, among others, on the machine the function was run on. All the system.time() and microbenchmark() calls below were run on the same computer and on the same day. However, keep in mind that if you re run the code in the vignette the output can be different. 
 
 ## Question 1
 ### *How much time does it take to run brute_force_knapsack for n = 16 objects?*
@@ -32,20 +33,20 @@ system.time(unoptimized_brute_force_knapsack(knapsack_objects[1:16, ], 2000))
 ```
 | user | system | elapsed |
 |-----:|-------:| -------:|  
-| 4.35 | 0.007  | 4.37    |
+| 4.34 | 0.000  | 4.35    |
 
 
 Method 2: microbenchmark 
-The microbenchmark function runs the algorithm multiple time to get a more accurate running time. As the unoptimized_brute_force_knapsack is really slow, we are going to run the microbenchmark 5 times.
+The microbenchmark function runs the algorithm multiple times to get a more accurate running time. We are going to run the function 10 times.
 ```{r, eval = FALSE}
-microbenchmark::microbenchmark(unoptimized_brute_force_knapsack(knapsack_objects[1:16, ], 2000), times = 5)
+microbenchmark::microbenchmark(unoptimized_brute_force_knapsack(knapsack_objects[1:16, ], 2000), times = 10)
 ```
 | min | lq  | mean | median | uq   | max |
 |----:|----:|-----:|-------:|----: |----:|
-|4.11 |4.22 | 5.19 | 5.07   | 4.25 | 4.35|
+|4.15 |4.18 | 4.26 | 4.24   | 4.33 | 4.44|
 Unit: seconds
 
-As you can see, we get a confirmation that our brute force implementation takes between 4 and 6 seconds (we look at the median) to run with an input size of only 16 objects. 
+As you can see, we get a confirmation that our brute force implementation takes around 4 seconds (we look at the median in the case of microbenchmarking) to run with an input size of only 16 objects. 
 
 ## Question 2
 ### *How much time does it take to run knapsack_dynamic with n = 500 objects?*
@@ -58,20 +59,20 @@ system.time(knapsack_dynamic(knapsack_objects[1:500, ], 2000))
 ```
 | user | system | elapsed |
 |-----:|-------:| -------:|  
-| 0.776| 0.064  | 0.839   |
+| 0.717| 0.008  | 0.725   |
 
 
 Method 2: microbenchmarking 
-The microbenchmark function runs the algorithm multiple time to get a more accurate running time. We are going to run the microbenchmark 5 times.
+The microbenchmark function runs the algorithm multiple time to get a more accurate running time. We are going to run the function 10 times.
 ```{r, eval = FALSE}
-microbenchmark::microbenchmark(knapsack_dynamic(knapsack_objects[1:500, ], 2000), times = 5)
+microbenchmark::microbenchmark(knapsack_dynamic(knapsack_objects[1:500, ], 2000), times = 10)
 ```
 | min   | lq    | mean    | median | uq     | max    |
 |------:|------:|---------|-------:|-------:|-------:|
-|698.64 |835.28 | 1466.43 | 922.27 | 975.48 | 3900.46|
+|631.43 |649.07 | 679.15  | 672.91 | 714.33 | 745.53 |
 Unit: milliseconds
 
-As you can see above, we get a confirmation that our algorithm takes around 900 milliseconds to run on 500 objects. Which considering the bigger input size, it's a huge performance improvement compared to the brute force version. 
+As you can see above, using the microbenchmark, the function takes around 0.672 seconds to run which is less than the system.time() output. The microbenchmark output is more reliable as the function is run more than once to get a more accurate running time.
 
 ## Question 3
 ### *How much time does it take to run greedy_knapsack on n = 1000000 objects?*
@@ -229,7 +230,7 @@ profvis::profvis({
   unoptimized_brute_force_knapsack(knapsack_objects[1:8, ], 2000)
 })
 ```
-As you can see, from working with a data frame to working with a vector with obtained a good performance improvement. 
+From working with a data frame to working with a vector with obtained a good performance improvement. 
 Now let's try to run the optimized version of the brute force algorithm with system.time() and microbenchmark:
 ```{r, eval = FALSE}
 system.time(brute_force_knapsack(knapsack_objects[1:16, ], 2000))
@@ -239,7 +240,7 @@ system.time(brute_force_knapsack(knapsack_objects[1:16, ], 2000))
 | 0.397 | 0.012  | 0.408   |
 
 ```{r, eval = FALSE}
-microbenchmark::microbenchmark(brute_force_knapsack(knapsack_objects[1:16, ], 2000), times = 5)
+microbenchmark::microbenchmark(brute_force_knapsack(knapsack_objects[1:16, ], 2000), times = 10)
 ```
 | min   | lq    | mean    | median | uq     | max    |
 |------:|------:|---------|-------:|-------:|-------:|
@@ -313,7 +314,7 @@ system.time(brute_force_knapsack_parallelized(knapsack_objects[1:16,], 2000))
 |------:|-------:| -------:|  
 | 0.737 | 0.558  | 0.450   |
 
-As you can see this is a huge improvements from the unoptimized_brute_force_knapsack. However, compared to brute_force_knapsack, this parallelized version performs slightly worse. 
+As you can see this is a huge improvements from the unoptimized_brute_force_knapsack. However, compared to brute_force_knapsack, this parallelized version performs slightly worse (however this can also be due to other factors not connected with how we wrote our code, the main idea though, is that we don't notice any significant improvment). 
 We then decided to try some platform dependent parallelization functions as after doing some research online, we found out that paralellization doesn't always work well on Windows machines. The one below is our final version of the brute force:
 ```{r, eval = FALSE}
 brute_force_knapsack <-
@@ -379,7 +380,8 @@ system.time(brute_force_knapsack(knapsack_objects[1:16, ], 2000), TRUE)
 |------:|-------:| -------:|  
 | 0.397 | 0.000  | 0.390   |
   
-As you can see, we obtain an improvement from the parallelized version that also works on Windows machines. However, also this version is not better than the optimized brute force version on average. They perform equally as good. 
+As you can see, we obtain an improvement from the parallelized version that also works on Windows machines. However, given the running time, we can't really say that parallelizing is worth it in this particular situation.
+Parallelization takes some resources at the beginning to create the different processes and to initialize the communication between them (overhead time) so it may not be worth it for n = 16. So we tried to time our two versions of the brute force on an input of n = 20.
 ```{r, eval = FALSE}
 system.time(brute_force_knapsack(knapsack_objects[1:20, ], 2000), TRUE)
 ```
@@ -393,17 +395,20 @@ system.time(brute_force_knapsack(knapsack_objects[1:20, ], 2000))
 |------:|-------:| -------:|  
 | 6.460 | 0.009  |  6.465  |
 As you can see, if we start increasing the input size, it is more clear that the parallelized version performs better. 
-In conclusion, it is better to use the platform dependent (UNIX like systems) parallelized version only for bigger input sizes (n >= 20).
+In conclusion, it is better to use the platform dependent (UNIX like systems) parallelized version only for bigger input sizes (n > 20).
 
 ## greedy_knapsack returns better results
-Our implementation of the greedy heuristic knapsack algorithm returns a better result than the ones in the test for larger n (we don't have this problem for smaller input sizes). 
+Our implementation of the greedy heuristic knapsack algorithm returns a better result than the ones in the test for larger n (we don't have this problem for smaller input sizes). In particular, we only fail the last two tests. Our outputs still respects the constraint of <= W. 
+
 This is a description of the algorithm we used:
 
 Step1: sort items in terms of the ratio value/weight in decreasing order
-Step2: select the elements with the biggest value/weight ratio until they fit in the knapsack
+Step2: select the elements (given the constraint) with the biggest value/weight ratio until they fit in the knapsack
 Step3: now do the same thing as above but instead of picking the elements with the biggest value/weight ratio we pick the elements with the biggest value until they fit in the knapsack
 Step4: compare the solutions from step2 and step3 and pick the best
 
 As you can see, this algorithm satisfies the greedy definition and has a time complexity of O(n) as the sort() function in R has a time complexity of O(n). 
 
-Probably, this is due to the fact that we can have objects with the same ratio v/w due to rounding. In this case, certain implementation can take an item as opposed to another with the same ratio only because that item shows up first. This can lead to performance differences. 
+We also noticed, that the only difference between the output in our implementation and the output of the last two tests is that our version returns some extra items (all the others are the same). It is because of these extra items that we get a better results. 
+
+Probably, this is due to the fact that we can have objects with the same ratio v/w due to rounding. In this case, certain implementations can take an item as opposed to another with the same ratio only because that item shows up first. This can lead to performance differences. 
