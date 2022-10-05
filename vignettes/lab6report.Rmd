@@ -78,8 +78,21 @@ As you can see above, using the microbenchmark, the function takes around 0.672 
 ### *How much time does it take to run greedy_knapsack on n = 1000000 objects?*
 The greedy version of the knapsack problem is the fastest of all. It has a time complexity of O(n). However, being a greedy heuristic algorithm, the result is not always optimal. However it can be shown that if m is the maximum value of the items that fit into the knapsack, the result of the greedy algorithm is at least m/2. More information can be found [here](https://en.wikipedia.org/wiki/Knapsack_problem).
 
-We tried to run the function on 1 million objects and we waited for an hour. After an hour the function was still running. So the running time is for sure more than an hour. We used only the system.time() function this time around. 
-Although the greedy algorithm is so much faster, an input of a million is still too big to be evaluated in a reasonable amount of time from a standard laptop.
+The running time with n = 1000000 is as follows:
+```{r, eval = FALSE}
+suppressWarnings(RNGversion(min("3.5.3", as.character(getRversion()))))
+
+set.seed(42, kind = "Mersenne-Twister", normal.kind = "Inversion")
+
+knapsack_big <- data.frame(w = sample(1:4000, size = 1000000, replace = TRUE),
+                               v = runif(n = 1000000, 0, 10000))
+
+system.time(greedy_knapsack(knapsack_big, 2000))
+```
+| user | system | elapsed |
+|-----:|-------:| -------:|  
+| 3.805| 0.488  | 4.293   |
+
 
 ## Question 4
 ### *What performance gain could you get by trying to optimize your code?*
@@ -133,7 +146,7 @@ profvis::profvis({
   unoptimized_brute_force_knapsack(knapsack_objects[1:8, ], 2000)
 })
 ```
-From running this function on profvis, we can notice that the two sapplys are the two bottlenecks. We tried to change the two sapplys with vapplys but we did not notice a huge improvement in performance:
+From running this function on profvis, we can notice that the two sapplys are the two bottlenecks. We tried to change the two sapplys with vapplys but we did not notice a big improvement in performance:
 ```{r, eval = FALSE}
 profvis::profvis({
   unoptimized_brute_force_knapsack <-
@@ -180,7 +193,7 @@ profvis::profvis({
   unoptimized_brute_force_knapsack(knapsack_objects[1:8, ], 2000)
 })
 ```
-However, we can notice that inside vapply the call of the function is taking a large amount of time. So we tried to optimize the function inside the vapply instead. 
+However, you can notice, from the output of profvis, that inside the vapplys the call of the function is taking a large amount of time. So we tried to optimize the function inside the vapplys instead. 
 ```{r, eval = FALSE}
 profvis::profvis({
   unoptimized_brute_force_knapsack <-
@@ -230,8 +243,8 @@ profvis::profvis({
   unoptimized_brute_force_knapsack(knapsack_objects[1:8, ], 2000)
 })
 ```
-From working with a data frame to working with a vector with obtained a good performance improvement. 
-Now let's try to run the optimized version of the brute force algorithm with system.time() and microbenchmark:
+From working with a data frame to working with a vector we obtained a good performance improvement. 
+Let's try to run the optimized version of the brute force algorithm with system.time() and microbenchmark:
 ```{r, eval = FALSE}
 system.time(brute_force_knapsack(knapsack_objects[1:16, ], 2000))
 ```
@@ -251,7 +264,7 @@ As you can see we greatly improved our running time (compare it with the tables 
 
 2) other functions
 
-We also tried the profvis function with the other functions but we didn't identify any bottleneck. Meaning, the only gray rectangle that shows up in the profvis output is on the function call. This is probably due to the fact that the algorithm for those two functions are pretty efficient to begin with. 
+We also tried the profvis function with the other functions but we didn't identify any bottleneck. Meaning, the only gray rectangle that shows up in the profvis output is on the function call. This is probably due to the fact that the algorithms for those two functions are pretty efficient to begin with. 
 
 ## Question 5
 ### *What performance gain could you get by parallelizing brute force search?*
@@ -314,7 +327,7 @@ system.time(brute_force_knapsack_parallelized(knapsack_objects[1:16,], 2000))
 |------:|-------:| -------:|  
 | 0.737 | 0.558  | 0.450   |
 
-As you can see this is a huge improvements from the unoptimized_brute_force_knapsack. However, compared to brute_force_knapsack, this parallelized version performs slightly worse (however this can also be due to other factors not connected with how we wrote our code, the main idea though, is that we don't notice any significant improvment). 
+As you can see this is a huge improvements from the unoptimized_brute_force_knapsack. However, compared to brute_force_knapsack, this parallelized version performs slightly worse (however this can also be due to other factors not connected with how we wrote our code, the main idea though, is that we don't notice any significant improvement). 
 We then decided to try some platform dependent parallelization functions as after doing some research online, we found out that paralellization doesn't always work well on Windows machines. The one below is our final version of the brute force:
 ```{r, eval = FALSE}
 brute_force_knapsack <-
@@ -397,21 +410,5 @@ system.time(brute_force_knapsack(knapsack_objects[1:20, ], 2000))
 As you can see, if we start increasing the input size, it is more clear that the parallelized version performs better. 
 In conclusion, it is better to use the platform dependent (UNIX like systems) parallelized version only for bigger input sizes (n > 20).
 
-## greedy_knapsack returns better results
-Our implementation of the greedy heuristic knapsack algorithm returns a better result than the ones in the test for larger n (we don't have this problem for smaller input sizes). In particular, we only fail the last two tests. Our outputs still respects the constraint of <= W. 
 
-This is a description of the algorithm we used:
-
-Step1: sort items in terms of the ratio value/weight in decreasing order
-Step2: for each item check if it fits, if it does put it into the knapsack. If it doesn't fit go on to the next until there's no more space available or no more items fit.
-Step3: now do the same thing as above but instead of picking the elements with the biggest value/weight ratio we pick the elements with the biggest value.
-Step4: compare the solutions from step2 and step3 and pick the best
-
-As you can see, this algorithm satisfies the greedy definition and has a time complexity of O(n) as the sort() function in R has a time complexity of O(n). 
-
-We also noticed, that the only difference between the output in our implementation and the output of the last two tests is that our version returns some extra items (all the others are the same). It is because of these extra items that we get a better results. 
-
-The output of the tests comes from the Wikipedia algorithm for the greedy knapsack. It can be found [here](https://en.wikipedia.org/wiki/Knapsack_problem). The difference between our version of the greedy knapsack and the Wikipedia one is that the one on Wikipedia stops putting items in the knapsack as soon as one item does not fit (the loop stops as soon as one item does not fit). In our implementation, on the other hand, we keep going on until the knapsack is full or no more items fit in the knapsack. 
-
-Notice that we manually changed the tests for the greedy knapsack from == to >= in order to get the green badge on GitHub.
 

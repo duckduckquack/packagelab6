@@ -53,7 +53,10 @@ greedy_knapsack <-
         e[item] <- 1
         #reduce capacity
         c <- c - w[item]
+      }else{
+        break
       }
+
     }
 
     elements <- which(e == 1)
@@ -79,6 +82,8 @@ greedy_knapsack <-
           e[item] <- 1
           #reduce capacity
           c <- c - w[item]
+        }else{
+          break
         }
       }
       elements2 <- which(e == 1)
