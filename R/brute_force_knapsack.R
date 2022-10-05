@@ -31,6 +31,9 @@ brute_force_knapsack <-
     n <- length(x$w)
     v <- x$v
     w <- x$w
+    #if n > 32 intToBits does not generate all the combinations, we should use
+    #expand.grid instead
+    stopifnot(n <= 32) #stop if n is too big
 
     #get the number of bit combinations
     m <- 2^n #number of combinations
