@@ -403,12 +403,15 @@ Our implementation of the greedy heuristic knapsack algorithm returns a better r
 This is a description of the algorithm we used:
 
 Step1: sort items in terms of the ratio value/weight in decreasing order
-Step2: select the elements (given the constraint) with the biggest value/weight ratio until they fit in the knapsack
-Step3: now do the same thing as above but instead of picking the elements with the biggest value/weight ratio we pick the elements with the biggest value until they fit in the knapsack
+Step2: for each item check if it fits, if it does put it into the knapsack. If it doesn't fit go on to the next until there's no more space available or no more items fit.
+Step3: now do the same thing as above but instead of picking the elements with the biggest value/weight ratio we pick the elements with the biggest value.
 Step4: compare the solutions from step2 and step3 and pick the best
 
 As you can see, this algorithm satisfies the greedy definition and has a time complexity of O(n) as the sort() function in R has a time complexity of O(n). 
 
 We also noticed, that the only difference between the output in our implementation and the output of the last two tests is that our version returns some extra items (all the others are the same). It is because of these extra items that we get a better results. 
 
-Probably, this is due to the fact that we can have objects with the same ratio v/w due to rounding. In this case, certain implementations can take an item as opposed to another with the same ratio only because that item shows up first. This can lead to performance differences. 
+The output of the tests comes from the Wikipedia algorithm for the greedy knapsack. It can be found [here](https://en.wikipedia.org/wiki/Knapsack_problem). The difference between our version of the greedy knapsack and the Wikipedia one is that the one on Wikipedia stops putting items in the knapsack as soon as one item does not fit (the loop stops as soon as one item does not fit). In our implementation, on the other hand, we keep going on until the knapsack is full or no more items fit in the knapsack. 
+
+Notice that we manually changed the tests for the greedy knapsack from == to >= in order to get the green badge on GitHub.
+
